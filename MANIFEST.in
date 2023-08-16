@@ -1,0 +1,2 @@
+include s2mgrs/points.csv
+include s2mgrs/tiles.csv
