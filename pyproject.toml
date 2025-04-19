@@ -3,7 +3,11 @@ name = "s2mgrs"
 version = "0.1.0"
 description = "get sentinel 2 mgrs tiles from AOIs or lat/lon coordinates"
 license = { text="MIT" }
-dependencies = []
+dependencies = [
+"numpy>=1.24.3",
+"geopandas>=1.0.0",
+"shapely>=2.0.2"
+]
 
 [tool.setuptools]
 # data to be included is specified in MANIFEST.in
