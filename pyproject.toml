@@ -1,0 +1,14 @@
+[project]
+name = "s2mgrs"
+version = "0.1.0"
+description = "get sentinel 2 mgrs tiles from AOIs or lat/lon coordinates"
+license = { text="MIT" }
+dependencies = []
+
+[tool.setuptools]
+# data to be included is specified in MANIFEST.in
+include-package-data = true
+
+[tool.setuptools.packages]
+find = {}
+
