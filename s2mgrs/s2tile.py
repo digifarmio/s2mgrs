@@ -1,5 +1,8 @@
 import numpy as np
 import os
+import geopandas as gpd
+from shapely.ops import unary_union
+
 
 def get_tilename(id):
     tiles_path = os.path.join(os.path.dirname(__file__), 'tiles.csv')    
@@ -39,7 +42,7 @@ def s2tile_features(aoi_gdf: gpd.GeoDataFrame) -> list:
     # return unique names
     return sorted(hits[tile_name_col].unique().tolist())
 
-def s2_tile(*args):
+def s2tile(*args):
     # Case 1: single GeoDataFrame → AOI mode
     if len(args) == 1 and isinstance(args[0], gpd.GeoDataFrame):
         return s2tile_features(args[0])
