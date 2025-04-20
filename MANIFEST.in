@@ -1,2 +1,3 @@
 include s2mgrs/points.csv
 include s2mgrs/tiles.csv
+include s2mgrs/s2mgrs_s2_index.geojson
