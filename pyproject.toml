@@ -1,7 +1,12 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "s2mgrs"
-version = "0.1.1"
-description = "get sentinel 2 mgrs tiles from AOIs or lat/lon coordinates"
+version = "0.1.2"
+description = "Return Sentinel-2 MGRS tiles for points or GeoDataFrame AOIs"
+# (add other PEP 621 fields like authors, license, dependencies, etc.)
 license = { text="MIT" }
 dependencies = [
 "numpy>=1.24.3",
@@ -9,10 +14,16 @@ dependencies = [
 "shapely>=2.0.2"
 ]
 
-[tool.setuptools]
-# data to be included is specified in MANIFEST.in
-include-package-data = true
+[tool.setuptools.packages.find]
+# This tells setuptools to look for packages under the current directory,
+# but only include the inner folder named 'my_s2tile_module'
+where = ["."]
+include = ["my_s2tile_module*"]
 
-[tool.setuptools.packages]
-find = {}
-
+[tool.setuptools.package-data]
+# Instruct setuptools to include all files under my_s2tile_module/data
+# (wildcards are supported)
+"my_s2tile_module" = [
+    "data/*.csv",
+    "data/*.geojson"
+]
