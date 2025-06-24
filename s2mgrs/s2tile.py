@@ -1,6 +1,7 @@
 import numpy as np
 import geopandas as gpd
 from shapely.ops import unary_union
+from shapely.geometry import box
 
 # importlib.resources is part of the stdlib from Python 3.7 onwards.
 # If you must support Python 3.7–3.8 on a system without it,
@@ -51,16 +52,32 @@ def s2tile_features(aoi_gdf: gpd.GeoDataFrame) -> list:
 
 
 def s2tile(*args):
-    # −− Case 1: single GeoDataFrame → AOI mode
+    # — Case 1: single GeoDataFrame → AOI mode
     if len(args) == 1 and isinstance(args[0], gpd.GeoDataFrame):
         return s2tile_features(args[0])
 
-    # −− Case 2: lat, lon as two numeric args
+    # — Case 2: single 4-tuple/list of numbers → AOI-bbox mode
+    if (
+        len(args) == 1
+        and isinstance(args[0], (tuple, list))
+        and len(args[0]) == 4
+        and all(isinstance(c, (int, float)) for c in args[0])
+    ):
+        w, s, e, n = args[0]
+        # build a Shapely box and wrap in a GeoDataFrame
+        bbox_gdf = gpd.GeoDataFrame(
+            {"geometry": [box(w, s, e, n)]},
+            crs="EPSG:4326"   # adjust CRS if needed
+        )
+        return s2tile_features(bbox_gdf)
+
+    # — Case 3: two numerics → point mode
     if len(args) == 2 and all(isinstance(a, (int, float)) for a in args):
         return s2tile_point(args[0], args[1])
 
     raise TypeError(
         "s2tile() accepts either:\n"
         "  • one GeoDataFrame, or\n"
+        "  • one 4-tuple/list of (w, s, e, n), or\n"
         "  • two numeric args (lat, lon)."
     )
