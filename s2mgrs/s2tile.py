@@ -94,7 +94,21 @@ def s2tile_features(aoi_gdf: gpd.GeoDataFrame) -> List[str]:
 
     # Find intersecting grid cells
     hits = mgrs_grid_gdf[mgrs_grid_gdf.geometry.intersects(aoi_union)]
-    return sorted(hits[tile_name_col].unique().tolist())
+    # Calculate the extent of intersection as percentages for each mgrs tile.
+    result = []
+    for _, row in hits.iterrows():
+        tile_geom = row.geometry
+        tile_code = row[tile_name_col]
+        intersection = tile_geom.intersection(aoi_union)
+        if intersection.is_empty:
+            continue
+        intersection_area = intersection.area
+        tile_area = tile_geom.area
+        percentage = (intersection_area / tile_area) * 100 if tile_area > 0 else 0
+
+        result.append((tile_code, percentage))
+    sorted_results = sorted(result, key=lambda x: (-x[1], x[0]))
+    return [code for code, _ in sorted_results]
 
 
 def get_countries(tile_codes: List[str]) -> Dict[str, List[str]]:
