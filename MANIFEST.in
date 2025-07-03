@@ -1,3 +1,4 @@
+include countries.geojson
 include s2mgrs/data/points.csv
-include s2mgrs/data/tiles.csv
 include s2mgrs/data/s2mgrs_s2_index.geojson
+include s2mgrs/data/tiles.csv
