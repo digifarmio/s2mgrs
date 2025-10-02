@@ -152,7 +152,7 @@ def get_countries(tile_codes: List[str]) -> Dict[str, List[str]]:
         for _, row in hits.iterrows():
             # Attempt to read standard fields for name and ISO code
             name = row.get('ADMIN') or row.get('name')
-            iso = row.get('ISO_A2') or row.get('ISO3166-1:alpha2')
+            iso = row.get('ISO_A2_EH') or row.get('ISO3166-1:alpha2')
             if short_output:
                 if iso:
                     countries_list.append(f"{iso}")
@@ -166,6 +166,51 @@ def get_countries(tile_codes: List[str]) -> Dict[str, List[str]]:
         result[tile] = sorted(set(countries_list))
 
     return result
+
+
+def get_geometry(tilename):
+    """
+    Return a GeoDataFrame with one row per requested MGRS tile name.
+
+    Accepts:
+      - a single tile name string, e.g. "47PPR"
+      - an iterable/list/tuple of tile name strings, e.g. ["47PPR", "12UUA"]
+
+    Returns:
+      - geopandas.GeoDataFrame with columns:
+          - "Name": requested tile name (keeps order of the input)
+          - "geometry": merged shapely geometry for the tile, or None if not found
+      - The returned GeoDataFrame uses the same CRS as the MGRS grid.
+
+    Examples:
+      get_geometry("47PPR")
+      get_geometry(["47PPR", "12UUA"])
+    """
+    tile_name_col = "Name"
+    mgrs_geojson = pkg_resources.files(data) / "s2mgrs_s2_index.geojson"
+    mgrs_grid = gpd.read_file(mgrs_geojson)
+
+    # Normalize input to a list preserving order
+    if isinstance(tilename, str):
+        tiles = [tilename]
+    elif isinstance(tilename, (list, tuple, np.ndarray)):
+        tiles = list(tilename)
+    else:
+        raise TypeError("tilename must be a str or a list/tuple/ndarray of str")
+
+    rows = []
+    for t in tiles:
+        cell = mgrs_grid[mgrs_grid[tile_name_col] == t]
+        if cell.empty:
+            rows.append({"Name": t, "geometry": None})
+            continue
+
+        # Merge multiple parts into a single geometry if needed
+        cell_geom = unary_union(cell.geometry)
+        rows.append({"Name": t, "geometry": cell_geom})
+
+    gdf = gpd.GeoDataFrame(rows, geometry="geometry", crs=mgrs_grid.crs)
+    return gdf
 
 
 def s2tile(*args):
